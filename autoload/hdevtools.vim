@@ -87,32 +87,31 @@ function! hdevtools#info(identifier)
     return
   endif
 
+  " Close previous previewwindow
+  pclose
   " Create a new window
-  call s:infowin_create("(" . l:identifier . ")")
+  "call s:infowin_create("(" . l:identifier . ")")
+  exe 'rightbelow ' (len(l:lines) + 1) ' new GHCi\ result'
 
   " Adjust the height of the Info Window so that all lines will fit
-  exe 'resize ' (len(l:lines) + 1)
+  "exe 'resize ' (len(l:lines) + 1)
 
   " The result returned from the 'info' command is very similar to regular
   " haskell code, so Haskell syntax highlighting looks good on it
-  setlocal filetype=haskell
+  setlocal syntax=haskell
 
   " Fill the contents of the Info Window with the result
   setlocal modifiable
   call append(0, l:lines)
   setlocal nomodifiable
+  setlocal previewwindow
+  setlocal buftype=nofile
+  setlocal noswapfile
 
   " Jump the cursor to the beginning of the buffer
   normal gg
 
-  " Look for the first line containing a reference to a file and jump the
-  " cursor to it if found
-  for l:i in range(0, len(l:lines)-1)
-    if match(l:lines[l:i], '-- Defined at \S\+:\d\+:\d\+') >= 0
-      call setpos(".", [0, l:i + 1, 1, 0])
-      break
-    endif
-  endfor
+  wincmd p
 
   " Apply syntax highlighting for these comments: -- Defined at Hello.hs:12:5
   " These are turned into links that can be jumped to
